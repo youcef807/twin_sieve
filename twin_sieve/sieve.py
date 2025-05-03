@@ -16,52 +16,50 @@ Usage:
     print(twin_prime_sieve(100))
 """
 
-def twin_prime_sieve(limit: int) -> list[tuple[int, int]]:
+import math
+
+def twin_primes(limit):
     """
-    Generate twin prime pairs up to a given limit using a sieve
-    based on numbers of the form 6k ± 1.
-
-    Twin primes are pairs of primes (p, p+2).
-    This sieve filters out non-prime candidates by eliminating
-    combinations generated from (6i ± 1)(6j ± 1) patterns.
-
+    Generate all twin primes (p, p+2) such that p+2 <= limit.
+    The algorithm uses a sieve based on the 6k ± 1 form.
+    
     Parameters:
-        limit (int): Upper bound of the search (inclusive).
-
-    Returns:
-        list[tuple[int, int]]: A list of twin prime pairs (p, p+2)
+    -----------
+    limit : int
+        Upper bound of the search (inclusive).
+    
+    Yields:
+    -------
+    tuple of int
+        Twin prime pair (p, p+2)
     """
     if limit < 5:
-        return []
+        return  # No twin primes possible
 
+    # Calculate number of candidates of the form 6k ± 1 up to limit
     n = (limit + 1) // 6
-    km1 = ((n + 1) // 5) + 1  # upper bound for i in sieve
-    t = [0] * (n + 2 * km1)   # sieve array
+    km1 = ((n + 1) // 5) + 1
+    t = [0] * (n + 2 * km1)
 
-    t[0] = 1  # 0 is not a candidate
+    t[0] = 1  # mark 6*0-1 as non-candidate (out of range)
 
+    # Sieve: mark non-twin-prime candidates
     for i in range(1, km1):
         km = ((n + 1) // ((6 * i) - 1)) + 1
         for j in range(i, km):
-            for index in [
-                (6 * i * j) + i + j,
-                (6 * i * j) + i - j,
-                (6 * i * j) - i + j,
-                (6 * i * j) - i - j
-            ]:
-                if 0 <= index < len(t):
-                    t[index] = 1
+            for dx in [i + j, i - j, -i + j, -i - j]:
+                idx = (6 * i * j) + dx
+                if 0 <= idx < len(t):
+                    t[idx] = 1
 
-    # Collect twin prime pairs (6k - 1, 6k + 1)
-    twins = []
+    # Yield valid twin primes from the sieve
     for i in range(1, n):
-        if not t[i] and not t[i + 1]:
+        if not t[i]:
             p1 = 6 * i - 1
             p2 = 6 * i + 1
             if p2 <= limit:
-                twins.append((p1, p2))
+                yield (p1, p2)
 
-    return twins
 
 
 if __name__ == "__main__":
